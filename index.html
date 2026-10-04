@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1769aa">
 <title>Teacher Connect Tirwa</title>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#17202a}
@@ -13,23 +17,25 @@ header{background:linear-gradient(135deg,#1769aa,#0d47a1);color:#fff;padding:22p
 .brand{display:flex;justify-content:space-between;align-items:center;gap:12px}
 h1{margin:0;font-size:27px}.tag{margin:5px 0 0;opacity:.9}
 nav{display:flex;gap:7px;overflow:auto;margin-top:16px}
-nav button{background:#ffffff22;color:#fff;border:1px solid #ffffff44;padding:9px 13px;border-radius:20px;white-space:nowrap}
+nav button{background:#ffffff22;color:#fff;border:1px solid #ffffff44;padding:9px 13px;border-radius:20px;white-space:nowrap;cursor:pointer;}
 main{padding:18px 12px}.card{background:#fff;border-radius:16px;padding:18px;margin:0 0 16px;box-shadow:0 4px 18px #00000012}
 h2{margin-top:0;color:#1769aa}h3{margin-bottom:7px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.brand{align-items:flex-start;flex-direction:column}}
 input,select,textarea{width:100%;padding:12px;margin:6px 0 12px;border:1px solid #ccd5df;border-radius:9px;font-size:15px;background:#fff}
 textarea{min-height:90px;resize:vertical}
-button,.btn{border:0;border-radius:9px;padding:11px 15px;background:#1769aa;color:#fff;font-size:15px;cursor:pointer}
+button,.btn{border:0;border-radius:9px;padding:11px 15px;background:#1769aa;color:#fff;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block;}
 button.secondary,.btn.secondary{background:#e8f1f8;color:#1769aa}
-button.danger{background:#c62828}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button.danger{background:#c62828}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 .hidden{display:none!important}
 .teacher{border:1px solid #e1e8ef;border-radius:13px;padding:15px;margin:10px 0;background:#fbfdff}
 .badge{display:inline-block;background:#e8f1f8;color:#1769aa;border-radius:20px;padding:4px 9px;font-size:12px;margin:3px 3px 3px 0}
+.badge.pending{background:#fff3e0;color:#e65100;}
 .empty{text-align:center;color:#687786;padding:25px}
 .msg{padding:10px;border-radius:9px;margin:8px 0;display:none}
 .ok{display:block;background:#e8f5e9;color:#1b5e20}.err{display:block;background:#ffebee;color:#b71c1c}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#eef6ff;padding:15px;border-radius:12px;text-align:center}.stat b{display:block;font-size:24px;color:#1769aa}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat{background:#eef6ff;padding:15px;border-radius:12px;text-align:center}.stat b{display:block;font-size:24px;color:#1769aa}
 footer{text-align:center;padding:25px;color:#607080}
 .small{font-size:13px;color:#687786}
 </style>
@@ -61,18 +67,17 @@ footer{text-align:center;padding:25px;color:#607080}
     </div>
   </div>
   <div class="stats">
-    <div class="stat"><b id="totalStat">0</b>Registered Teachers</div>
+    <div class="stat"><b id="totalStat">0</b>Teachers</div>
     <div class="stat"><b id="subjectStat">0</b>Subjects</div>
     <div class="stat"><b id="cityStat">0</b>Locations</div>
   </div>
   <div class="card">
     <h2>यह कैसे काम करता है?</h2>
     <ol>
-      <li>Teacher Registration में अपनी जानकारी भरें।</li>
-      <li>Profile सेव होने के बाद Find Teacher में नाम/विषय/स्थान से खोजें।</li>
+      <li>Teacher Registration में अपनी जानकारी भरें (Status: Pending रहेगा)।</li>
+      <li>Admin (आप) के Approve करने के बाद ही प्रोफाइल सर्च में दिखेगी।</li>
       <li>विद्यार्थी सीधे Call या WhatsApp से संपर्क कर सकते हैं।</li>
     </ol>
-    <p class="small">नोट: यह GitHub Pages वाला version browser के local storage में data रखता है। इसलिए यह उसी device/browser पर काम करेगा। सभी users के लिए online shared database के लिए Firebase/Supabase जैसे backend की जरूरत होगी।</p>
   </div>
 </section>
 
@@ -90,7 +95,7 @@ footer{text-align:center;padding:25px;color:#607080}
 </div>
 <label>About / Teaching Details</label><textarea id="about" placeholder="Classes, exam preparation, teaching experience..."></textarea>
 <div id="regMsg" class="msg"></div>
-<button type="submit">Save Teacher Profile</button>
+<button type="submit">Submit Profile</button>
 <button type="button" class="secondary" onclick="show('home')">Cancel</button>
 </form>
 </div>
@@ -99,25 +104,26 @@ footer{text-align:center;padding:25px;color:#607080}
 <section id="search" class="hidden">
 <div class="card">
 <h2>Find a Teacher</h2>
-<input id="searchBox" oninput="renderTeachers()" placeholder="Name, subject, location या qualification से खोजें">
+<input id="searchBox" oninput="renderTeachers()" placeholder="Name, subject या location से खोजें">
 <div id="teacherList"></div>
 </div>
 </section>
 
 <section id="admin" class="hidden">
 <div class="card" id="adminLogin">
-<h2>Admin Login</h2>
-<p class="small">Demo admin password: <b>1234</b> — इसे production में बदलें।</p>
-<input id="adminPass" type="password" placeholder="Admin password">
-<button onclick="loginAdmin()">Login</button>
+<h2>Admin Login (Secured)</h2>
+<p class="small">Firebase Authentication Email & Password इस्तेमाल करें।</p>
+<input id="adminEmail" type="email" placeholder="Admin Email">
+<input id="adminPass" type="password" placeholder="Admin Password">
+<button onclick="loginAdmin()">Secure Login</button>
 <div id="adminMsg" class="msg"></div>
 </div>
 <div class="card hidden" id="adminPanel">
 <h2>Admin Panel</h2>
-<p>यहाँ registered teacher profiles manage कर सकते हैं।</p>
+<p>यहाँ आप Teachers को Approve/Suspend या Delete कर सकते हैं।</p>
 <div class="actions">
-<button onclick="exportData()">Export Data</button>
-<button class="danger" onclick="deleteAll()">Delete All</button>
+<button onclick="renderAdmin()">Refresh List</button>
+<button class="danger" onclick="logoutAdmin()">Logout</button>
 </div>
 <div id="adminList"></div>
 </div>
@@ -128,50 +134,101 @@ footer{text-align:center;padding:25px;color:#607080}
 <footer>© 2026 Teacher Connect Tirwa</footer>
 
 <script>
-const KEY="teacher_connect_tirwa_v2";
-let teachers=JSON.parse(localStorage.getItem(KEY)||"[]");
+// ==========================================
+// 1. FIREBASE CONFIGURATION (यहाँ अपने कोड डालें)
+// ==========================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "teacherconnecttirwa.firebaseapp.com",
+  projectId: "teacherconnecttirwa",
+  storageBucket: "teacherconnecttirwa.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-function save(){localStorage.setItem(KEY,JSON.stringify(teachers));updateStats();}
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
+let allApprovedTeachers = [];
+
+// ==========================================
+// 2. UI NAVIGATION
+// ==========================================
 function show(id){
   document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
-  if(id==="search") renderTeachers();
-  if(id==="admin") renderAdmin();
+  if(id==="search") loadApprovedTeachers();
+  if(id==="admin" && auth.currentUser) {
+      document.getElementById("adminLogin").classList.add("hidden");
+      document.getElementById("adminPanel").classList.remove("hidden");
+      renderAdmin();
+  }
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function msg(id,text,type){
   const e=document.getElementById(id); e.textContent=text;
   e.className="msg "+type;
-  setTimeout(()=>e.className="msg",3500);
+  setTimeout(()=>e.className="msg",4000);
 }
 
-document.getElementById("teacherForm").addEventListener("submit",e=>{
+// ==========================================
+// 3. TEACHER REGISTRATION (Saves to Firestore)
+// ==========================================
+document.getElementById("teacherForm").addEventListener("submit", async e=>{
   e.preventDefault();
-  const t={
-    id:Date.now(),
-    name:name.value.trim(),
-    subject:subject.value.trim(),
-    qualification:qualification.value.trim(),
-    experience:experience.value.trim(),
-    location:location.value.trim(),
-    phone:phone.value.trim(),
-    about:about.value.trim(),
-    created:new Date().toLocaleDateString("en-IN")
+  const t = {
+    name: document.getElementById("name").value.trim(),
+    subject: document.getElementById("subject").value.trim(),
+    qualification: document.getElementById("qualification").value.trim(),
+    experience: document.getElementById("experience").value.trim(),
+    location: document.getElementById("location").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    about: document.getElementById("about").value.trim(),
+    status: "PENDING", // By default hidden from students
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
+  
   if(!/^[0-9]{10}$/.test(t.phone)){msg("regMsg","कृपया 10 अंकों का mobile number डालें।","err");return;}
-  teachers.push(t);save();
-  e.target.reset();
-  msg("regMsg","Teacher profile successfully saved!","ok");
-  setTimeout(()=>show("search"),700);
+  
+  try {
+      await db.collection("teachers").add(t);
+      e.target.reset();
+      msg("regMsg","Profile submitted! Admin के approve करने के बाद यह लिस्ट में दिखेगी।","ok");
+      setTimeout(()=>show("home"),2000);
+      updateDashboardStats();
+  } catch(error) {
+      msg("regMsg", "Error: " + error.message, "err");
+  }
 });
+
+// ==========================================
+// 4. GUARDIAN SEARCH (Fetches Approved Teachers)
+// ==========================================
+async function loadApprovedTeachers() {
+    const box = document.getElementById("teacherList");
+    box.innerHTML = '<div class="empty">Loading teachers...</div>';
+    try {
+        const snapshot = await db.collection("teachers").where("status", "==", "APPROVED").get();
+        allApprovedTeachers = [];
+        snapshot.forEach(doc => {
+            allApprovedTeachers.push({ id: doc.id, ...doc.data() });
+        });
+        renderTeachers();
+    } catch (error) {
+        box.innerHTML = `<div class="empty err">Error loading data. Check Firebase permissions.</div>`;
+    }
+}
 
 function renderTeachers(){
  const q=(document.getElementById("searchBox")?.value||"").toLowerCase().trim();
- const list=teachers.filter(t=>Object.values(t).some(v=>String(v).toLowerCase().includes(q)));
+ const list = allApprovedTeachers.filter(t=>Object.values(t).some(v=>String(v).toLowerCase().includes(q)));
  const box=document.getElementById("teacherList");
+ 
  if(!list.length){box.innerHTML='<div class="empty">कोई teacher profile नहीं मिली।</div>';return;}
+ 
  box.innerHTML=list.map(t=>`
  <div class="teacher">
    <h3>${esc(t.name)}</h3>
@@ -187,47 +244,100 @@ function renderTeachers(){
  </div>`).join("");
 }
 
-function loginAdmin(){
- if(document.getElementById("adminPass").value==="1234"){
-   document.getElementById("adminLogin").classList.add("hidden");
-   document.getElementById("adminPanel").classList.remove("hidden");
-   renderAdmin();
- }else msg("adminMsg","गलत password","err");
+// ==========================================
+// 5. ADMIN SECURE LOGIN & PANEL
+// ==========================================
+async function loginAdmin(){
+    const email = document.getElementById("adminEmail").value;
+    const pass = document.getElementById("adminPass").value;
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        document.getElementById("adminLogin").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        renderAdmin();
+    } catch(error) {
+        msg("adminMsg", "Login Failed: " + error.message, "err");
+    }
 }
 
-function renderAdmin(){
- const box=document.getElementById("adminList"); if(!box)return;
- if(!teachers.length){box.innerHTML='<div class="empty">No teacher profiles.</div>';return;}
- box.innerHTML=teachers.map(t=>`
- <div class="teacher">
- <b>${esc(t.name)}</b> — ${esc(t.subject)} — ${esc(t.phone)}
- <button class="danger" onclick="removeTeacher(${t.id})">Delete</button>
- </div>`).join("");
+function logoutAdmin() {
+    auth.signOut().then(() => {
+        document.getElementById("adminPanel").classList.add("hidden");
+        document.getElementById("adminLogin").classList.remove("hidden");
+        document.getElementById("adminEmail").value = '';
+        document.getElementById("adminPass").value = '';
+    });
 }
 
-function removeTeacher(id){
- if(confirm("इस teacher profile को delete करें?")){
-  teachers=teachers.filter(t=>t.id!==id);save();renderAdmin();renderTeachers();
+async function renderAdmin(){
+ const box = document.getElementById("adminList"); 
+ box.innerHTML = '<div class="empty">Loading database...</div>';
+ try {
+     const snapshot = await db.collection("teachers").orderBy("timestamp", "desc").get();
+     if(snapshot.empty){box.innerHTML='<div class="empty">No teacher profiles.</div>';return;}
+     
+     let html = "";
+     snapshot.forEach(doc => {
+         const t = doc.data();
+         html += `
+         <div class="teacher">
+         <b>${esc(t.name)}</b> — ${esc(t.subject)} — ${esc(t.phone)}<br>
+         Status: <span class="badge ${t.status === 'PENDING' ? 'pending' : ''}">${t.status}</span>
+         <div class="actions">
+             <button class="secondary" onclick="updateStatus('${doc.id}', 'APPROVED')">Approve</button>
+             <button class="secondary" style="background:#fff3e0;color:#e65100;" onclick="updateStatus('${doc.id}', 'PENDING')">Suspend</button>
+             <button class="danger" onclick="removeTeacher('${doc.id}')">Delete</button>
+         </div>
+         </div>`;
+     });
+     box.innerHTML = html;
+ } catch (error) {
+     box.innerHTML = `<div class="empty err">Admin Access Denied or Error.</div>`;
  }
 }
-function deleteAll(){
- if(confirm("सभी teacher profiles delete करें?")){
-  teachers=[];save();renderAdmin();renderTeachers();
+
+async function updateStatus(id, newStatus) {
+    try {
+        await db.collection("teachers").doc(id).update({ status: newStatus });
+        renderAdmin();
+        updateDashboardStats();
+    } catch(e) { alert("Error updating status"); }
+}
+
+async function removeTeacher(id){
+ if(confirm("इस profile को हमेशा के लिए delete करें?")){
+  try {
+      await db.collection("teachers").doc(id).delete();
+      renderAdmin();
+      updateDashboardStats();
+  } catch(e) { alert("Delete failed"); }
  }
 }
-function exportData(){
- const blob=new Blob([JSON.stringify(teachers,null,2)],{type:"application/json"});
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="teacher-connect-tirwa-data.json";a.click();
+
+// ==========================================
+// 6. DASHBOARD STATS
+// ==========================================
+async function updateDashboardStats(){
+ try {
+     const snapshot = await db.collection("teachers").where("status", "==", "APPROVED").get();
+     let subjects = new Set();
+     let locations = new Set();
+     snapshot.forEach(doc => {
+         subjects.add(doc.data().subject.toLowerCase());
+         locations.add(doc.data().location.toLowerCase());
+     });
+     document.getElementById("totalStat").textContent = snapshot.size;
+     document.getElementById("subjectStat").textContent = subjects.size;
+     document.getElementById("cityStat").textContent = locations.size;
+ } catch(e) { console.log("Stats error", e); }
 }
+
 function esc(s){
- return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+ return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 }
-function updateStats(){
- document.getElementById("totalStat").textContent=teachers.length;
- document.getElementById("subjectStat").textContent=new Set(teachers.map(t=>t.subject.toLowerCase())).size;
- document.getElementById("cityStat").textContent=new Set(teachers.map(t=>t.location.toLowerCase())).size;
-}
-updateStats();
+
+// Run stats on load
+updateDashboardStats();
 </script>
 </body>
 </html>
