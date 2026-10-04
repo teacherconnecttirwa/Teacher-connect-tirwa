@@ -1,63 +1,233 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#1769aa"><link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1769aa">
 <title>Teacher Connect Tirwa</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f5f7fb;color:#182230}
-header{background:#1769aa;color:white;padding:18px 16px;position:sticky;top:0;z-index:5}header h1{margin:0;font-size:22px}header p{margin:4px 0 0;opacity:.9}
-main{max-width:760px;margin:auto;padding:16px}.card{background:white;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 12px #00000010}
-button{border:0;border-radius:10px;padding:11px 14px;background:#1769aa;color:#fff;font-weight:700;cursor:pointer;margin:4px 4px 4px 0}
-button.alt{background:#e9eef5;color:#18324a}.danger{background:#c62828}.ok{background:#2e7d32}
-input,select,textarea{width:100%;padding:12px;border:1px solid #ccd5df;border-radius:10px;margin:6px 0 12px;font:inherit}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pill{display:inline-block;background:#e9f2fb;color:#1769aa;padding:4px 9px;border-radius:99px;margin:2px;font-size:12px}
-.hidden{display:none}.muted{color:#667085;font-size:14px}.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:10px}.tabs button{white-space:nowrap}
-.teacher{border:1px solid #e0e6ed;border-radius:14px;padding:14px;margin:10px 0}.status{font-weight:700}.center{text-align:center}
-</style></head>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#17202a}
+header{background:linear-gradient(135deg,#1769aa,#0d47a1);color:#fff;padding:22px 16px;position:sticky;top:0;z-index:10;box-shadow:0 3px 12px #0002}
+.wrap{max-width:950px;margin:auto}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{margin:0;font-size:27px}.tag{margin:5px 0 0;opacity:.9}
+nav{display:flex;gap:7px;overflow:auto;margin-top:16px}
+nav button{background:#ffffff22;color:#fff;border:1px solid #ffffff44;padding:9px 13px;border-radius:20px;white-space:nowrap}
+main{padding:18px 12px}.card{background:#fff;border-radius:16px;padding:18px;margin:0 0 16px;box-shadow:0 4px 18px #00000012}
+h2{margin-top:0;color:#1769aa}h3{margin-bottom:7px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.brand{align-items:flex-start;flex-direction:column}}
+input,select,textarea{width:100%;padding:12px;margin:6px 0 12px;border:1px solid #ccd5df;border-radius:9px;font-size:15px;background:#fff}
+textarea{min-height:90px;resize:vertical}
+button,.btn{border:0;border-radius:9px;padding:11px 15px;background:#1769aa;color:#fff;font-size:15px;cursor:pointer}
+button.secondary,.btn.secondary{background:#e8f1f8;color:#1769aa}
+button.danger{background:#c62828}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.hidden{display:none!important}
+.teacher{border:1px solid #e1e8ef;border-radius:13px;padding:15px;margin:10px 0;background:#fbfdff}
+.badge{display:inline-block;background:#e8f1f8;color:#1769aa;border-radius:20px;padding:4px 9px;font-size:12px;margin:3px 3px 3px 0}
+.empty{text-align:center;color:#687786;padding:25px}
+.msg{padding:10px;border-radius:9px;margin:8px 0;display:none}
+.ok{display:block;background:#e8f5e9;color:#1b5e20}.err{display:block;background:#ffebee;color:#b71c1c}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#eef6ff;padding:15px;border-radius:12px;text-align:center}.stat b{display:block;font-size:24px;color:#1769aa}
+footer{text-align:center;padding:25px;color:#607080}
+.small{font-size:13px;color:#687786}
+</style>
+</head>
 <body>
-<header><h1>Teacher Connect Tirwa</h1><p>Tirwa ke har bachche tak sahi teacher.</p></header>
-<main id="app"></main>
+<header>
+<div class="wrap">
+  <div class="brand">
+    <div><h1>Teacher Connect Tirwa</h1><div class="tag">तिरवा क्षेत्र के शिक्षकों और विद्यार्थियों को जोड़ने का प्लेटफॉर्म</div></div>
+  </div>
+  <nav>
+    <button onclick="show('home')">Home</button>
+    <button onclick="show('register')">Teacher Registration</button>
+    <button onclick="show('search')">Find Teacher</button>
+    <button onclick="show('admin')">Admin</button>
+  </nav>
+</div>
+</header>
+
+<main class="wrap">
+
+<section id="home">
+  <div class="card">
+    <h2>Teacher Connect Tirwa में आपका स्वागत है</h2>
+    <p>अपने क्षेत्र के शिक्षक खोजें या शिक्षक के रूप में अपना प्रोफाइल दर्ज करें।</p>
+    <div class="actions">
+      <button onclick="show('register')">Register as Teacher</button>
+      <button class="secondary" onclick="show('search')">Find a Teacher</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="totalStat">0</b>Registered Teachers</div>
+    <div class="stat"><b id="subjectStat">0</b>Subjects</div>
+    <div class="stat"><b id="cityStat">0</b>Locations</div>
+  </div>
+  <div class="card">
+    <h2>यह कैसे काम करता है?</h2>
+    <ol>
+      <li>Teacher Registration में अपनी जानकारी भरें।</li>
+      <li>Profile सेव होने के बाद Find Teacher में नाम/विषय/स्थान से खोजें।</li>
+      <li>विद्यार्थी सीधे Call या WhatsApp से संपर्क कर सकते हैं।</li>
+    </ol>
+    <p class="small">नोट: यह GitHub Pages वाला version browser के local storage में data रखता है। इसलिए यह उसी device/browser पर काम करेगा। सभी users के लिए online shared database के लिए Firebase/Supabase जैसे backend की जरूरत होगी।</p>
+  </div>
+</section>
+
+<section id="register" class="hidden">
+<div class="card">
+<h2>Teacher Registration</h2>
+<form id="teacherForm">
+<div class="grid">
+<div><label>Teacher Name *</label><input id="name" required></div>
+<div><label>Subject *</label><input id="subject" placeholder="Maths, Science..." required></div>
+<div><label>Qualification</label><input id="qualification" placeholder="B.Ed., M.Sc. etc."></div>
+<div><label>Experience</label><input id="experience" placeholder="e.g. 5 years"></div>
+<div><label>Location *</label><input id="location" placeholder="Tirwa, Kannauj..." required></div>
+<div><label>Mobile *</label><input id="phone" type="tel" pattern="[0-9]{10}" maxlength="10" required></div>
+</div>
+<label>About / Teaching Details</label><textarea id="about" placeholder="Classes, exam preparation, teaching experience..."></textarea>
+<div id="regMsg" class="msg"></div>
+<button type="submit">Save Teacher Profile</button>
+<button type="button" class="secondary" onclick="show('home')">Cancel</button>
+</form>
+</div>
+</section>
+
+<section id="search" class="hidden">
+<div class="card">
+<h2>Find a Teacher</h2>
+<input id="searchBox" oninput="renderTeachers()" placeholder="Name, subject, location या qualification से खोजें">
+<div id="teacherList"></div>
+</div>
+</section>
+
+<section id="admin" class="hidden">
+<div class="card" id="adminLogin">
+<h2>Admin Login</h2>
+<p class="small">Demo admin password: <b>1234</b> — इसे production में बदलें।</p>
+<input id="adminPass" type="password" placeholder="Admin password">
+<button onclick="loginAdmin()">Login</button>
+<div id="adminMsg" class="msg"></div>
+</div>
+<div class="card hidden" id="adminPanel">
+<h2>Admin Panel</h2>
+<p>यहाँ registered teacher profiles manage कर सकते हैं।</p>
+<div class="actions">
+<button onclick="exportData()">Export Data</button>
+<button class="danger" onclick="deleteAll()">Delete All</button>
+</div>
+<div id="adminList"></div>
+</div>
+</section>
+
+</main>
+
+<footer>© 2026 Teacher Connect Tirwa</footer>
+
 <script>
-const K='tctirwa_v1';
-let db=JSON.parse(localStorage.getItem(K)||'{"users":[],"requests":[],"session":null}');
-if(!db.users.length) db.users=[
- {id:'a1',role:'admin',name:'Admin',phone:'admin',password:'Tirwa@123',status:'approved'},
- {id:'t1',role:'teacher',name:'Demo Teacher',phone:'9999999999',password:'Teacher@123',subject:'Maths, Science',classes:'6-10',qualification:'M.Sc.',experience:'5 years',fee:'1500',area:'Tirwa',status:'approved'}
-];
-const save=()=>localStorage.setItem(K,JSON.stringify(db));
-const id=()=>Math.random().toString(36).slice(2)+Date.now();
-const app=document.getElementById('app');
-function esc(s=''){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function layout(title,body){app.innerHTML=`<div class="card"><h2>${title}</h2>${body}</div>`}
-function home(){layout('Welcome',`<div class="center"><p>Teacher और Guardian को जोड़ने वाला Tirwa platform.</p><button onclick="login()">Login</button><button class="alt" onclick="register('teacher')">Teacher Registration</button><button class="alt" onclick="register('guardian')">Guardian Registration</button><p class="muted">Demo Admin: admin / Tirwa@123</p></div>`)}
-function login(){layout('Login',`<label>Username / Mobile</label><input id="phone"><label>Password</label><input id="pass" type="password"><button onclick="doLogin()">Login</button><button class="alt" onclick="home()">Back</button><p id="msg"></p>`)}
-function doLogin(){let u=db.users.find(x=>x.phone===phone.value&&x.password===pass.value);if(!u){msg.textContent='गलत login details';return}db.session=u.id;save();route()}
-function register(role){layout(role==='teacher'?'Teacher Registration':'Guardian Registration',`
-<label>Name</label><input id="name">
-<label>Mobile</label><input id="phone">
-<label>Password</label><input id="pass" type="password">
-${role==='teacher'?`<div class="grid"><div><label>Qualification</label><input id="qualification"></div><div><label>Experience</label><input id="experience"></div></div>
-<label>Subjects</label><input id="subject" placeholder="Maths, Science">
-<label>Classes</label><input id="classes" placeholder="6-10">
-<div class="grid"><div><label>Monthly Fee</label><input id="fee"></div><div><label>Area</label><input id="area" value="Tirwa"></div></div>`
-:`<label>Child Name</label><input id="child"><div class="grid"><div><label>Child Class</label><input id="childclass"></div><div><label>Preferred Subject</label><input id="prefsubject"></div></div><label>Area</label><input id="area" value="Tirwa">`}
-<button onclick="saveReg('${role}')">Register</button><button class="alt" onclick="home()">Back</button>`)}
-function saveReg(role){let u={id:id(),role,name:name.value.trim(),phone:phone.value.trim(),password:pass.value,status:role==='teacher'?'pending':'approved'};if(!u.name||!u.phone||!u.password){alert('Name, mobile और password भरें');return}
-if(role==='teacher')Object.assign(u,{qualification:qualification.value,experience:experience.value,subject:subject.value,classes:classes.value,fee:fee.value,area:area.value});
-else Object.assign(u,{child:child.value,childclass:childclass.value,prefsubject:prefsubject.value,area:area.value});
-if(db.users.some(x=>x.phone===u.phone)){alert('यह mobile पहले से registered है');return}db.users.push(u);save();alert(role==='teacher'?'Registration हो गया। Admin approval के बाद profile दिखेगी।':'Registration successful');login()}
-function route(){let u=db.users.find(x=>x.id===db.session);if(!u){home();return}if(u.role==='admin')admin();else if(u.role==='teacher')teacher(u);else guardian(u)}
-function nav(label,fn){return `<button class="alt" onclick="${fn}">${label}</button>`}
-function top(){return `<div class="tabs">${nav('Home','route()')}${nav('Logout','logout()')}</div>`}
-function logout(){db.session=null;save();home()}
-function teacher(u){layout('Teacher Dashboard',top()+`<div class="card"><h3>${esc(u.name)}</h3><p>Status: <span class="status">${esc(u.status)}</span></p><p>${esc(u.qualification||'')} • ${esc(u.experience||'')}</p><p>${esc(u.subject||'')} • Classes ${esc(u.classes||'')}</p><p>₹${esc(u.fee||'')} / month • ${esc(u.area||'')}</p></div><h3>Teaching Requests</h3>${db.requests.filter(r=>r.teacherId===u.id).map(r=>{let g=db.users.find(x=>x.id===r.guardianId);return `<div class="card"><b>${esc(g?.name||'Guardian')}</b><p>Child: ${esc(g?.child||'')} | Class: ${esc(g?.childclass||'')}</p><p>Status: ${esc(r.status)}</p>${r.status==='pending'?`<button class="ok" onclick="req('${r.id}','accepted')">Accept</button><button class="danger" onclick="req('${r.id}','rejected')">Reject</button>`:''}</div>`}).join('')||'<p class="muted">कोई request नहीं है।</p>'}`)}
-function req(rid,status){let r=db.requests.find(x=>x.id===rid);if(r){r.status=status;save();route()}}
-function guardian(u){let teachers=db.users.filter(x=>x.role==='teacher'&&x.status==='approved');layout('Guardian Dashboard',top()+`<div class="card"><b>नमस्ते ${esc(u.name)}</b><p class="muted">Approved teachers खोजें और request भेजें।</p><input id="search" placeholder="Subject, area, class या name" oninput="filterTeachers()"></div><div id="teachers">${teacherCards(teachers,u)}</div><h3>My Requests</h3>${db.requests.filter(r=>r.guardianId===u.id).map(r=>{let t=db.users.find(x=>x.id===r.teacherId);return `<div class="card"><b>${esc(t?.name||'Teacher')}</b><p>${esc(r.status)}</p></div>`}).join('')||'<p class="muted">अभी कोई request नहीं।</p>'}`)}
-function teacherCards(ts,u){return ts.map(t=>`<div class="teacher"><h3>${esc(t.name)}</h3><span class="pill">${esc(t.subject||'')}</span><span class="pill">Class ${esc(t.classes||'')}</span><p>${esc(t.qualification||'')} • ${esc(t.experience||'')}</p><p>₹${esc(t.fee||'')} / month • ${esc(t.area||'')}</p><button onclick="sendReq('${t.id}','${u.id}')">Request Teacher</button></div>`).join('')||'<p>No teachers found.</p>'}
-function filterTeachers(){let q=search.value.toLowerCase();let u=db.users.find(x=>x.id===db.session);let ts=db.users.filter(t=>t.role==='teacher'&&t.status==='approved'&&[t.name,t.subject,t.classes,t.area,t.qualification].join(' ').toLowerCase().includes(q));document.getElementById('teachers').innerHTML=teacherCards(ts,u)}
-function sendReq(tid,gid){if(db.requests.some(r=>r.teacherId===tid&&r.guardianId===gid&&['pending','accepted'].includes(r.status))){alert('Request पहले से मौजूद है');return}db.requests.push({id:id(),teacherId:tid,guardianId:gid,status:'pending',createdAt:new Date().toISOString()});save();alert('Teacher को request भेज दी गई।');route()}
-function admin(){let pending=db.users.filter(x=>x.role==='teacher'&&x.status==='pending');let teachers=db.users.filter(x=>x.role==='teacher');let guardians=db.users.filter(x=>x.role==='guardian');layout('Admin Dashboard',top()+`<div class="grid"><div class="card"><b>${teachers.length}</b><br>Teachers</div><div class="card"><b>${guardians.length}</b><br>Guardians</div><div class="card"><b>${pending.length}</b><br>Pending</div><div class="card"><b>${db.requests.length}</b><br>Requests</div></div><h3>Pending Teachers</h3>${pending.map(t=>`<div class="card"><b>${esc(t.name)}</b><p>${esc(t.subject)} • ${esc(t.area)} • ₹${esc(t.fee)}</p><button class="ok" onclick="approve('${t.id}')">Approve</button><button class="danger" onclick="reject('${t.id}')">Reject</button></div>`).join('')||'<p class="muted">No pending teachers.</p>'}<h3>All Teachers</h3>${teachers.map(t=>`<div class="card"><b>${esc(t.name)}</b> — ${esc(t.status)} <button class="danger" onclick="suspend('${t.id}')">${t.status==='suspended'?'Activate':'Suspend'}</button></div>`).join('')}`)}
-function approve(id){let u=db.users.find(x=>x.id===id);u.status='approved';save();admin()}function reject(id){let u=db.users.find(x=>x.id===id);u.status='rejected';save();admin()}function suspend(id){let u=db.users.find(x=>x.id===id);u.status=u.status==='suspended'?'approved':'suspended';save();admin()}
-route();
-</script></body></html>
+const KEY="teacher_connect_tirwa_v2";
+let teachers=JSON.parse(localStorage.getItem(KEY)||"[]");
+
+function save(){localStorage.setItem(KEY,JSON.stringify(teachers));updateStats();}
+
+function show(id){
+  document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  if(id==="search") renderTeachers();
+  if(id==="admin") renderAdmin();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function msg(id,text,type){
+  const e=document.getElementById(id); e.textContent=text;
+  e.className="msg "+type;
+  setTimeout(()=>e.className="msg",3500);
+}
+
+document.getElementById("teacherForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const t={
+    id:Date.now(),
+    name:name.value.trim(),
+    subject:subject.value.trim(),
+    qualification:qualification.value.trim(),
+    experience:experience.value.trim(),
+    location:location.value.trim(),
+    phone:phone.value.trim(),
+    about:about.value.trim(),
+    created:new Date().toLocaleDateString("en-IN")
+  };
+  if(!/^[0-9]{10}$/.test(t.phone)){msg("regMsg","कृपया 10 अंकों का mobile number डालें।","err");return;}
+  teachers.push(t);save();
+  e.target.reset();
+  msg("regMsg","Teacher profile successfully saved!","ok");
+  setTimeout(()=>show("search"),700);
+});
+
+function renderTeachers(){
+ const q=(document.getElementById("searchBox")?.value||"").toLowerCase().trim();
+ const list=teachers.filter(t=>Object.values(t).some(v=>String(v).toLowerCase().includes(q)));
+ const box=document.getElementById("teacherList");
+ if(!list.length){box.innerHTML='<div class="empty">कोई teacher profile नहीं मिली।</div>';return;}
+ box.innerHTML=list.map(t=>`
+ <div class="teacher">
+   <h3>${esc(t.name)}</h3>
+   <span class="badge">${esc(t.subject)}</span>
+   ${t.qualification?`<span class="badge">${esc(t.qualification)}</span>`:""}
+   ${t.experience?`<span class="badge">${esc(t.experience)}</span>`:""}
+   <p><b>Location:</b> ${esc(t.location)}</p>
+   ${t.about?`<p>${esc(t.about)}</p>`:""}
+   <div class="actions">
+     <a class="btn" href="tel:${t.phone}">Call</a>
+     <a class="btn" target="_blank" href="https://wa.me/91${t.phone}?text=${encodeURIComponent("Hello "+t.name+", Teacher Connect Tirwa से संपर्क कर रहा/रही हूँ।")}">WhatsApp</a>
+   </div>
+ </div>`).join("");
+}
+
+function loginAdmin(){
+ if(document.getElementById("adminPass").value==="1234"){
+   document.getElementById("adminLogin").classList.add("hidden");
+   document.getElementById("adminPanel").classList.remove("hidden");
+   renderAdmin();
+ }else msg("adminMsg","गलत password","err");
+}
+
+function renderAdmin(){
+ const box=document.getElementById("adminList"); if(!box)return;
+ if(!teachers.length){box.innerHTML='<div class="empty">No teacher profiles.</div>';return;}
+ box.innerHTML=teachers.map(t=>`
+ <div class="teacher">
+ <b>${esc(t.name)}</b> — ${esc(t.subject)} — ${esc(t.phone)}
+ <button class="danger" onclick="removeTeacher(${t.id})">Delete</button>
+ </div>`).join("");
+}
+
+function removeTeacher(id){
+ if(confirm("इस teacher profile को delete करें?")){
+  teachers=teachers.filter(t=>t.id!==id);save();renderAdmin();renderTeachers();
+ }
+}
+function deleteAll(){
+ if(confirm("सभी teacher profiles delete करें?")){
+  teachers=[];save();renderAdmin();renderTeachers();
+ }
+}
+function exportData(){
+ const blob=new Blob([JSON.stringify(teachers,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="teacher-connect-tirwa-data.json";a.click();
+}
+function esc(s){
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+function updateStats(){
+ document.getElementById("totalStat").textContent=teachers.length;
+ document.getElementById("subjectStat").textContent=new Set(teachers.map(t=>t.subject.toLowerCase())).size;
+ document.getElementById("cityStat").textContent=new Set(teachers.map(t=>t.location.toLowerCase())).size;
+}
+updateStats();
+</script>
+</body>
+</html>
